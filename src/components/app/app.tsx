@@ -11,6 +11,7 @@ import {
 } from '@pages';
 import '../../index.css';
 import styles from './app.module.css';
+import { useEffect } from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import { Modal } from '../modal';
 import { OrderInfo } from '../order-info';
@@ -18,9 +19,20 @@ import { IngredientDetails } from '../ingredient-details';
 
 import { AppHeader } from '@components';
 import { Preloader } from '@ui';
+import { useDispatch, useSelector } from '../../services/store';
+import { fetchIngredients } from '../../services/slices/ingredientsSlice';
 
 const App = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const isIngredientsLoading = useSelector(
+    (state) => state.ingredients.isLoading
+  );
+  const ingredientsError = useSelector((state) => state.ingredients.error);
+
+  useEffect(() => {
+    dispatch(fetchIngredients());
+  }, [dispatch]);
 
   const handleOrderModalClose = () => {
     // TODO кнопка закрытия модального окна
@@ -30,6 +42,10 @@ const App = () => {
   return (
     <div className={styles.app}>
       <AppHeader />
+      {isIngredientsLoading && <Preloader />}
+      {ingredientsError && (
+        <p className='text text_type_main-medium mt-10'>{ingredientsError}</p>
+      )}
       <Routes>
         <Route path='/' element={<ConstructorPage />} />
         <Route path='/login' element={<Login />} />

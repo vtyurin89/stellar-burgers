@@ -8,7 +8,6 @@ import { FC } from 'react';
 export const ConstructorPage: FC = () => {
   const isIngredientsLoading = false;
   const ingredientsError = null;
-  const ingredients = [];
 
   return (
     <main className={styles.containerMain}>
