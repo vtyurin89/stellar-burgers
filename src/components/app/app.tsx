@@ -35,10 +35,6 @@ const App = () => {
     dispatch(fetchIngredients());
   }, [dispatch]);
 
-  useEffect(() => {
-    console.log('INGREDIENTS:', ingredients);
-  }, [ingredients]);
-
   const handleOrderModalClose = () => {
     // TODO кнопка закрытия модального окна
     navigate('/feed');
