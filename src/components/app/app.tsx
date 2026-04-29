@@ -25,6 +25,7 @@ import { fetchIngredients } from '../../services/slices/ingredientsSlice';
 const App = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const ingredients = useSelector((state) => state.ingredients.ingredients);
   const isIngredientsLoading = useSelector(
     (state) => state.ingredients.isLoading
   );
@@ -33,6 +34,10 @@ const App = () => {
   useEffect(() => {
     dispatch(fetchIngredients());
   }, [dispatch]);
+
+  useEffect(() => {
+    console.log('INGREDIENTS:', ingredients);
+  }, [ingredients]);
 
   const handleOrderModalClose = () => {
     // TODO кнопка закрытия модального окна
