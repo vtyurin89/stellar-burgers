@@ -40,6 +40,11 @@ const App = () => {
     navigate('/feed');
   };
 
+  const handleIngredientModalClose = () => {
+    // TODO кнопка закрытия модального окна
+    navigate('/');
+  };
+
   return (
     <div className={styles.app}>
       <AppHeader />
@@ -67,7 +72,7 @@ const App = () => {
         <Route
           path='/ingredients/:id'
           element={
-            <Modal title='Ингредиенты' onClose={handleOrderModalClose}>
+            <Modal title='Ингредиенты' onClose={handleIngredientModalClose}>
               <IngredientDetails />
             </Modal>
           }
