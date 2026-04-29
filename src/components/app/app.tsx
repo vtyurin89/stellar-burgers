@@ -15,6 +15,7 @@ import { Route, Routes, useNavigate } from 'react-router-dom';
 import { Modal } from '../modal';
 import { OrderInfo } from '../order-info';
 import { IngredientDetails } from '../ingredient-details';
+import { ProtectedRoute } from '../protected-route';
 
 import { AppHeader } from '@components';
 import { Preloader } from '@ui';
@@ -37,13 +38,55 @@ const App = () => {
       <AppHeader />
       <Routes>
         <Route path='/' element={<ConstructorPage />} />
-        <Route path='/login' element={<Login />} />
-        <Route path='/register' element={<Register />} />
-        <Route path='/forgot-password' element={<ForgotPassword />} />
-        <Route path='/reset-password' element={<ResetPassword />} />
+        <Route
+          path='/login'
+          element={
+            <ProtectedRoute>
+              <Login />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/register'
+          element={
+            <ProtectedRoute>
+              <Register />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/forgot-password'
+          element={
+            <ProtectedRoute>
+              <ForgotPassword />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/reset-password'
+          element={
+            <ProtectedRoute>
+              <ResetPassword />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/profile/orders'
+          element={
+            <ProtectedRoute>
+              <ProfileOrders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/profile'
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
         <Route path='/feed' element={<Feed />} />
-        <Route path='/profile/orders' element={<ProfileOrders />} />
-        <Route path='/profile' element={<Profile />} />
         <Route
           path='/feed/:number'
           element={
@@ -63,9 +106,11 @@ const App = () => {
         <Route
           path='/profile/orders/:number'
           element={
-            <Modal title='Число заказов' onClose={handleOrderModalClose}>
-              <OrderInfo />
-            </Modal>
+            <ProtectedRoute>
+              <Modal title='Число заказов' onClose={handleOrderModalClose}>
+                <OrderInfo />
+              </Modal>
+            </ProtectedRoute>
           }
         />
         <Route path='/*' element={<NotFound404 />} />
