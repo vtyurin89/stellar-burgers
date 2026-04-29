@@ -1,4 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
+import { constructorReducer } from './slices/constructorSlice';
 import { ingredientsReducer } from './slices/ingredientsSlice';
 
 import {
@@ -8,7 +9,8 @@ import {
 } from 'react-redux';
 
 const rootReducer = {
-  ingredients: ingredientsReducer
+  ingredients: ingredientsReducer,
+  burgerConstructor: constructorReducer
 };
 
 const store = configureStore({
