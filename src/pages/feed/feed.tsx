@@ -13,11 +13,6 @@ export const Feed: FC = () => {
   }, [dispatch]);
   const orders: TOrder[] = useSelector((state) => state.feed.orders);
 
-  // ОТЛАДКА - УДАЛИТЬ
-  useEffect(() => {
-    console.log('ORDERS: ', orders);
-  }, [orders]);
-
   if (!orders.length) {
     return <Preloader />;
   }
