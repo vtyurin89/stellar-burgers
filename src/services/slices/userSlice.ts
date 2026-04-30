@@ -2,7 +2,8 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import {
   TRegisterData,
   getUserApi,
-  loginUserApi
+  loginUserApi,
+  registerUserApi
 } from '../../utils/burger-api';
 import { getCookie } from '../../utils/cookie';
 import { TUser } from '../../utils/types';
@@ -18,12 +19,20 @@ export const getUser = createAsyncThunk(
   async () => await getUserApi()
 );
 
+export const registerUser = createAsyncThunk(
+  'user/registerUser',
+  async ({ email, name, password }: TRegisterData) =>
+    await registerUserApi({ email, name, password })
+);
+
 type TUserState = {
   isAuthChecked: boolean;
   isAuthenticated: boolean;
   data: TUser | null;
   loginUserError: string | null;
   loginUserRequest: boolean;
+  registerUserError: string | null;
+  registerUserRequest: boolean;
 };
 
 const initialState: TUserState = {
@@ -31,7 +40,9 @@ const initialState: TUserState = {
   isAuthenticated: false,
   data: null,
   loginUserError: null,
-  loginUserRequest: false
+  loginUserRequest: false,
+  registerUserError: null,
+  registerUserRequest: false
 };
 
 const userSlice = createSlice({
@@ -66,6 +77,21 @@ const userSlice = createSlice({
       })
       .addCase(getUser.rejected, (state) => {
         state.isAuthenticated = false;
+        state.isAuthChecked = true;
+      })
+      .addCase(registerUser.pending, (state) => {
+        state.registerUserRequest = true;
+        state.registerUserError = null;
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.registerUserRequest = false;
+        state.registerUserError = action.error.message ?? 'Ошибка регистрации';
+        state.isAuthChecked = true;
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.data = action.payload.user;
+        state.registerUserRequest = false;
+        state.isAuthenticated = true;
         state.isAuthChecked = true;
       });
   }
