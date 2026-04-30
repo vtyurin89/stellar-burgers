@@ -20,6 +20,10 @@ export const ProtectedRoute = ({
     console.log('user: ', user);
   }, [user]);
 
+  useEffect(() => {
+    console.log('isAuthChecked: ', isAuthChecked);
+  }, [isAuthChecked]);
+
   if (!isAuthChecked) {
     return <Preloader />;
   }

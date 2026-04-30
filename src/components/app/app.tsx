@@ -11,6 +11,7 @@ import {
 } from '@pages';
 import '../../index.css';
 import styles from './app.module.css';
+import { useEffect } from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import { Modal } from '../modal';
 import { OrderInfo } from '../order-info';
@@ -19,9 +20,16 @@ import { ProtectedRoute } from '../protected-route';
 
 import { AppHeader } from '@components';
 import { Preloader } from '@ui';
+import { useDispatch } from '../../services/store';
+import { checkUserAuth } from '../../services/slices/userSlice';
 
 const App = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(checkUserAuth());
+  }, [dispatch]);
 
   const handleOrderModalClose = () => {
     // TODO кнопка закрытия модального окна
