@@ -5,7 +5,7 @@ import {
   loginUserApi,
   registerUserApi
 } from '../../utils/burger-api';
-import { getCookie } from '../../utils/cookie';
+import { getCookie, setCookie } from '../../utils/cookie';
 import { TUser } from '../../utils/types';
 
 export const loginUser = createAsyncThunk(
@@ -65,6 +65,8 @@ const userSlice = createSlice({
         state.isAuthChecked = true;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
+        localStorage.setItem('refreshToken', action.payload.refreshToken);
+        setCookie('accessToken', action.payload.accessToken);
         state.data = action.payload.user;
         state.loginUserRequest = false;
         state.isAuthenticated = true;
@@ -89,6 +91,8 @@ const userSlice = createSlice({
         state.isAuthChecked = true;
       })
       .addCase(registerUser.fulfilled, (state, action) => {
+        localStorage.setItem('refreshToken', action.payload.refreshToken);
+        setCookie('accessToken', action.payload.accessToken);
         state.data = action.payload.user;
         state.registerUserRequest = false;
         state.isAuthenticated = true;
