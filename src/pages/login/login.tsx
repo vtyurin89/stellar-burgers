@@ -7,11 +7,13 @@ import { useNavigate } from 'react-router-dom';
 export const Login: FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
+    setError('');
     if (
       email &&
       password &&
@@ -30,12 +32,14 @@ export const Login: FC = () => {
         .catch((error) => {
           console.error('Ошибка авторизации:', error);
         });
+    } else {
+      setError('Пожалуйста, заполните все поля!');
     }
   };
 
   return (
     <LoginUI
-      errorText=''
+      errorText={error}
       email={email}
       setEmail={setEmail}
       password={password}

@@ -15,14 +15,6 @@ export const ProtectedRoute = ({
   const isAuthChecked = useSelector((state) => state.user.isAuthChecked);
   const user = useSelector((state) => state.user.data);
   const location = useLocation();
-  // ОТЛАДКА - УДАЛИТЬ
-  useEffect(() => {
-    console.log('user: ', user);
-  }, [user]);
-
-  useEffect(() => {
-    console.log('isAuthChecked: ', isAuthChecked);
-  }, [isAuthChecked]);
 
   if (!isAuthChecked) {
     return <Preloader />;

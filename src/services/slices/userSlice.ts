@@ -3,9 +3,10 @@ import {
   TRegisterData,
   getUserApi,
   loginUserApi,
-  registerUserApi
+  registerUserApi,
+  logoutApi
 } from '../../utils/burger-api';
-import { getCookie, setCookie } from '../../utils/cookie';
+import { getCookie, setCookie, deleteCookie } from '../../utils/cookie';
 import { TUser } from '../../utils/types';
 
 export const loginUser = createAsyncThunk(
@@ -25,6 +26,11 @@ export const registerUser = createAsyncThunk(
     await registerUserApi({ email, name, password })
 );
 
+export const logoutUser = createAsyncThunk(
+  'user/logoutUser',
+  async () => await logoutApi()
+);
+
 type TUserState = {
   isAuthChecked: boolean;
   isAuthenticated: boolean;
@@ -33,6 +39,8 @@ type TUserState = {
   loginUserRequest: boolean;
   registerUserError: string | null;
   registerUserRequest: boolean;
+  logoutUserError: string | null;
+  logoutUserRequest: boolean;
 };
 
 const initialState: TUserState = {
@@ -42,7 +50,9 @@ const initialState: TUserState = {
   loginUserError: null,
   loginUserRequest: false,
   registerUserError: null,
-  registerUserRequest: false
+  registerUserRequest: false,
+  logoutUserError: null,
+  logoutUserRequest: false
 };
 
 const userSlice = createSlice({
@@ -61,7 +71,8 @@ const userSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loginUserRequest = false;
-        state.loginUserError = action.error.message ?? 'Ошибка авторизации';
+        state.loginUserError =
+          action.error.message ?? 'Ошибка авторизации пользователя!!';
         state.isAuthChecked = true;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
@@ -87,7 +98,8 @@ const userSlice = createSlice({
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.registerUserRequest = false;
-        state.registerUserError = action.error.message ?? 'Ошибка регистрации';
+        state.registerUserError =
+          action.error.message ?? 'Ошибка регистрации пользователя!!';
         state.isAuthChecked = true;
       })
       .addCase(registerUser.fulfilled, (state, action) => {
@@ -97,6 +109,23 @@ const userSlice = createSlice({
         state.registerUserRequest = false;
         state.isAuthenticated = true;
         state.isAuthChecked = true;
+      })
+      .addCase(logoutUser.pending, (state) => {
+        state.logoutUserRequest = true;
+        state.logoutUserError = null;
+      })
+      .addCase(logoutUser.rejected, (state, action) => {
+        state.logoutUserRequest = false;
+        state.logoutUserError =
+          action.error.message ?? 'Ошибка выхода из аккаунта!!';
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.logoutUserRequest = false;
+        state.logoutUserError = null;
+        state.isAuthenticated = false;
+        state.data = null;
+        deleteCookie('accessToken');
+        deleteCookie('refreshToken');
       });
   }
 });

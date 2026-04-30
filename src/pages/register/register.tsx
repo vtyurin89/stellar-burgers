@@ -8,11 +8,13 @@ export const Register: FC = () => {
   const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
+    setError('');
     if (
       email &&
       userName &&
@@ -26,6 +28,7 @@ export const Register: FC = () => {
         name: userName.trim(),
         password: password.trim()
       };
+
       dispatch(registerUser(data))
         .unwrap()
         .then(() => {
@@ -34,12 +37,14 @@ export const Register: FC = () => {
         .catch((error) => {
           console.error('Ошибка регистрации:', error);
         });
+    } else {
+      setError('Пожалуйста, заполните все поля!');
     }
   };
 
   return (
     <RegisterUI
-      errorText=''
+      errorText={error}
       email={email}
       userName={userName}
       password={password}
