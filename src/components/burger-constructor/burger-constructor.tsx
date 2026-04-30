@@ -4,7 +4,8 @@ import { BurgerConstructorUI } from '@ui';
 import { useDispatch, useSelector } from '../../services/store';
 import {
   closeOrderModal,
-  createOrder
+  createOrder,
+  clearIngredients
 } from '../../services/slices/constructorSlice';
 
 export const BurgerConstructor: FC = () => {
@@ -21,7 +22,14 @@ export const BurgerConstructor: FC = () => {
 
   const onOrderClick = () => {
     if (!constructorItems.bun || orderRequest) return;
-    dispatch(createOrder());
+    dispatch(createOrder())
+      .unwrap()
+      .then(() => {
+        dispatch(clearIngredients());
+      })
+      .catch((error) => {
+        console.error('Ошибка при оформлении заказа: ', error);
+      });
   };
   const handleCloseOrderModal = () => {
     dispatch(closeOrderModal());

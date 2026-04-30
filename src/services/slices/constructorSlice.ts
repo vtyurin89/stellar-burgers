@@ -71,6 +71,10 @@ const constructorSlice = createSlice({
     },
     closeOrderModal: (state) => {
       state.orderModalData = null;
+    },
+    clearIngredients: (state) => {
+      state.constructorItems.ingredients = [];
+      state.constructorItems.bun = null;
     }
   },
   extraReducers: (builder) => {
@@ -88,6 +92,11 @@ const constructorSlice = createSlice({
   }
 });
 
-export const { setBun, addIngredient, removeIngredient, closeOrderModal } =
-  constructorSlice.actions;
+export const {
+  setBun,
+  addIngredient,
+  removeIngredient,
+  closeOrderModal,
+  clearIngredients
+} = constructorSlice.actions;
 export const constructorReducer = constructorSlice.reducer;
