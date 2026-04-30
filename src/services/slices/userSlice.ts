@@ -4,7 +4,8 @@ import {
   getUserApi,
   loginUserApi,
   registerUserApi,
-  logoutApi
+  logoutApi,
+  updateUserApi
 } from '../../utils/burger-api';
 import { getCookie, setCookie, deleteCookie } from '../../utils/cookie';
 import { TUser } from '../../utils/types';
@@ -31,6 +32,11 @@ export const logoutUser = createAsyncThunk(
   async () => await logoutApi()
 );
 
+export const updateUser = createAsyncThunk(
+  'user/updateUser',
+  async (user: Partial<TRegisterData>) => await updateUserApi(user)
+);
+
 type TUserState = {
   isAuthChecked: boolean;
   isAuthenticated: boolean;
@@ -41,6 +47,8 @@ type TUserState = {
   registerUserRequest: boolean;
   logoutUserError: string | null;
   logoutUserRequest: boolean;
+  updateUserError: string | null;
+  updateUserRequest: boolean;
 };
 
 const initialState: TUserState = {
@@ -52,7 +60,9 @@ const initialState: TUserState = {
   registerUserError: null,
   registerUserRequest: false,
   logoutUserError: null,
-  logoutUserRequest: false
+  logoutUserRequest: false,
+  updateUserError: null,
+  updateUserRequest: false
 };
 
 const userSlice = createSlice({
@@ -126,6 +136,20 @@ const userSlice = createSlice({
         state.data = null;
         deleteCookie('accessToken');
         deleteCookie('refreshToken');
+      })
+      .addCase(updateUser.pending, (state) => {
+        state.updateUserRequest = true;
+        state.updateUserError = null;
+      })
+      .addCase(updateUser.rejected, (state, action) => {
+        state.updateUserRequest = false;
+        state.updateUserError =
+          action.error.message ?? 'Ошибка обновления профиля';
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.updateUserRequest = false;
+        state.updateUserError = null;
+        state.data = action.payload.user;
       });
   }
 });
