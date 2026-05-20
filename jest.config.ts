@@ -104,7 +104,27 @@ const config: Config = {
   // notifyMode: "failure-change",
 
   // A preset that is used as a base for Jest's configuration
-  preset: 'ts-jest'
+  preset: 'ts-jest',
+  passWithNoTests: true,
+
+  // Unit tests in src/; Playwright — tests/*.pl.tsx (npm run test:e2e)
+  roots: ['<rootDir>/src'],
+  testMatch: [
+    '**/__tests__/**/*.[jt]s?(x)',
+    '**/*.test.[jt]s?(x)'
+  ],
+  testPathIgnorePatterns: ['/node_modules/', '/tests/'],
+  testEnvironment: 'jsdom',
+  moduleNameMapper: {
+    '^@pages(.*)$': '<rootDir>/src/pages$1',
+    '^@components(.*)$': '<rootDir>/src/components$1',
+    '^@ui(.*)$': '<rootDir>/src/components/ui$1',
+    '^@ui-pages(.*)$': '<rootDir>/src/components/ui/pages$1',
+    '^@utils-types$': '<rootDir>/src/utils/types',
+    '^@api$': '<rootDir>/src/utils/burger-api.ts',
+    '^@slices(.*)$': '<rootDir>/src/services/slices$1',
+    '^@selectors(.*)$': '<rootDir>/src/services/selectors$1'
+  },
 
   // Run tests from one or more projects
   // projects: undefined,
