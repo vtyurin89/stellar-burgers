@@ -74,6 +74,15 @@ const constructorSlice = createSlice({
           (item) => item.id !== action.payload
         );
     },
+    moveIngredient: (
+      state,
+      action: PayloadAction<{ from: number; to: number }>
+    ) => {
+      const { from, to } = action.payload;
+      const ingredients = state.constructorItems.ingredients;
+      const [moved] = ingredients.splice(from, 1);
+      ingredients.splice(to, 0, moved);
+    },
     closeOrderModal: (state) => {
       state.orderModalData = null;
     },
@@ -101,6 +110,7 @@ export const {
   setBun,
   addIngredient,
   removeIngredient,
+  moveIngredient,
   closeOrderModal,
   clearIngredients
 } = constructorSlice.actions;
