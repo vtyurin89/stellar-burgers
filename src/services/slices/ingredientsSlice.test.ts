@@ -27,7 +27,7 @@ describe('Проверка слайса ingredientsSlice', () => {
   test('Проверка fetchIngredients.pending: isLoading = true', () => {
     const result = ingredientsReducer(
       initialState,
-      fetchIngredients.pending('', '')
+      fetchIngredients.pending('requestId')
     );
 
     expect(result.isLoading).toBe(true);
@@ -39,7 +39,7 @@ describe('Проверка слайса ingredientsSlice', () => {
 
     const result = ingredientsReducer(
       loadingState,
-      fetchIngredients.fulfilled(mockIngredients, '', undefined)
+      fetchIngredients.fulfilled(mockIngredients, 'requestId')
     );
 
     expect(result.isLoading).toBe(false);
@@ -49,15 +49,11 @@ describe('Проверка слайса ingredientsSlice', () => {
 
   test('Провверка fetchIngredients.rejected: ошибка в сторе, isLoading = false', () => {
     const loadingState = { ...initialState, isLoading: true };
-    const errorMessage = 'Не удалось загрузить ингредиенты';
+    const errorMessage = 'KERNEL_INGREDIENTS_ERROR';
 
     const result = ingredientsReducer(
       loadingState,
-      fetchIngredients.rejected(
-        new Error(errorMessage),
-        '',
-        undefined
-      )
+      fetchIngredients.rejected(new Error(errorMessage), 'requestId')
     );
 
     expect(result.isLoading).toBe(false);
