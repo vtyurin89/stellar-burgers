@@ -47,7 +47,7 @@ describe('Проверка слайса ingredientsSlice', () => {
     expect(result.error).toBeNull();
   });
 
-  test('Провверка fetchIngredients.rejected: ошибка в сторе, isLoading = false', () => {
+  test('Проверка fetchIngredients.rejected: ошибка в сторе, isLoading = false', () => {
     const loadingState = { ...initialState, isLoading: true };
     const errorMessage = 'KERNEL_INGREDIENTS_ERROR';
 

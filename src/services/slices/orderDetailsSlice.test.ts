@@ -28,7 +28,7 @@ describe('Проверка слайса orderDetailsSlice', () => {
   test('Проверка fetchOrder.fulfilled: данные заказов в сторе, isLoading = false', () => {
     const loadingState = { ...initialState, isLoading: true };
     const mockOrderResponse = {
-      success: true as const,
+      success: true,
       orders: [mockOrder]
     };
 
@@ -42,7 +42,7 @@ describe('Проверка слайса orderDetailsSlice', () => {
     expect(result.error).toBeNull();
   });
 
-  test('Провверка fetchOrder.rejected: ошибка, isLoading = false', () => {
+  test('Проверка fetchOrder.rejected: ошибка, isLoading = false', () => {
     const loadingState = { ...initialState, isLoading: true };
     const errorMessage = 'KERNEL_FETCH_ORDER_ERROR';
 
