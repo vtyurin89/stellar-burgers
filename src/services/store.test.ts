@@ -1,5 +1,7 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { rootReducer } from './store';
+
+const combinedReducer = combineReducers(rootReducer);
 
 const expectedInitialState = {
   ingredients: {
@@ -51,5 +53,11 @@ describe('Проверка rootReducer', () => {
   test('Проверка инициализации rootReducer', () => {
     const store = configureStore({ reducer: rootReducer });
     expect(store.getState()).toEqual(expectedInitialState);
+  });
+
+  test('неизвестный экшен при undefined состоянии возвращает начальное состояние', () => {
+    const result = combinedReducer(undefined, { type: 'UNKNOWN_ACTION' });
+
+    expect(result).toEqual(expectedInitialState);
   });
 });
