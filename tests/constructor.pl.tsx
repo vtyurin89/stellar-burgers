@@ -4,6 +4,46 @@ import { test, expect, Page, BrowserContext } from '@playwright/test';
 const harsDir = path.join(__dirname, '../e2e/hars');
 const mockUserName = 'Test User';
 const mockOrderNumber = '12345';
+const mockBunName = 'Краторная булка N-200i';
+const mockMainName = 'Биокотлета из марсианской Магнолии';
+
+function getConstructor(page: Page) {
+  return page.locator('section').filter({
+    has: page.getByRole('button', { name: 'Оформить заказ' })
+  });
+}
+
+async function setupIngredientsMock(page: Page) {
+  await page.routeFromHAR(path.join(harsDir, 'ingredients.har'), {
+    url: '**/ingredients',
+    update: false
+  });
+}
+
+async function addIngredientFromList(page: Page, name: string) {
+  const card = page.locator('li').filter({ hasText: name });
+  await card.getByRole('button', { name: 'Добавить' }).click();
+}
+
+async function buildFullBurger(page: Page) {
+  await addIngredientFromList(page, mockBunName);
+  await addIngredientFromList(page, mockMainName);
+}
+
+async function expectEmptyConstructor(page: Page) {
+  const constructor = getConstructor(page);
+  await expect(constructor.getByText('Выберите булки')).toHaveCount(2);
+  await expect(constructor.getByText('Выберите начинку')).toBeVisible();
+}
+
+async function expectFullBurgerInConstructor(page: Page) {
+  const constructor = getConstructor(page);
+  await expect(constructor.getByText(`${mockBunName} (верх)`)).toBeVisible();
+  await expect(constructor.getByText(`${mockBunName} (низ)`)).toBeVisible();
+  await expect(constructor.locator('ul li').filter({ hasText: mockMainName })).toBeVisible();
+  await expect(constructor.getByText('Выберите булки')).not.toBeVisible();
+  await expect(constructor.getByText('Выберите начинку')).not.toBeVisible();
+}
 
 async function setupApiMocks(page: Page) {
   await page.routeFromHAR(path.join(harsDir, 'ingredients.har'), {
@@ -32,10 +72,7 @@ async function setAuthCookies(context: BrowserContext) {
 
 test.describe('Перехват запроса ингредиентов', () => {
   test('должен записать HAR-файл', async ({ page }) => {
-    await page.routeFromHAR(path.join(harsDir, 'ingredients.har'), {
-      url: '**/ingredients',
-      update: false
-    });
+    await setupIngredientsMock(page);
 
     await page.goto('/');
 
@@ -75,16 +112,14 @@ test.describe('Моки HAR: пользователь и заказ', () => {
     });
   });
 
-  test('моковые данные ответа на запрос создания заказа', async ({ page }) => {
+  test('полный сценарий создания заказа', async ({ page }) => {
     await page.goto('/');
     await expect(
       page.getByRole('heading', { name: 'Соберите бургер' })
     ).toBeVisible();
 
-    const bunCard = page.locator('li').filter({
-      hasText: 'Краторная булка N-200i'
-    });
-    await bunCard.getByRole('button', { name: 'Добавить' }).click();
+    await buildFullBurger(page);
+    await expectFullBurgerInConstructor(page);
 
     const orderResponsePromise = page.waitForResponse(
       (response) =>
@@ -107,15 +142,50 @@ test.describe('Моки HAR: пользователь и заказ', () => {
     await expect(
       page.getByText('идентификатор заказа', { exact: true })
     ).toBeVisible();
+
+    await expectEmptyConstructor(page);
+
+    await page.locator('#modals').getByRole('button').click();
+
+    await expect(
+      page.getByRole('heading', { name: mockOrderNumber })
+    ).not.toBeVisible();
+    await expectEmptyConstructor(page);
+  });
+});
+
+test.describe('Добавление ингредиентов в конструктор', () => {
+  test.beforeEach(async ({ page }) => {
+    await setupIngredientsMock(page);
+    await page.goto('/');
+    await expect(
+      page.getByRole('heading', { name: 'Соберите бургер' })
+    ).toBeVisible();
+  });
+
+  test('добавление булки и начинки в конструктор', async ({ page }) => {
+    await expectEmptyConstructor(page);
+
+    await addIngredientFromList(page, mockBunName);
+    const constructor = getConstructor(page);
+
+    await expect(constructor.getByText(`${mockBunName} (верх)`)).toBeVisible();
+    await expect(constructor.getByText(`${mockBunName} (низ)`)).toBeVisible();
+    await expect(constructor.getByText('Выберите булки')).not.toBeVisible();
+    await expect(constructor.getByText('Выберите начинку')).toBeVisible();
+
+    await addIngredientFromList(page, mockMainName);
+
+    await expect(
+      constructor.locator('ul li').filter({ hasText: mockMainName })
+    ).toBeVisible();
+    await expect(constructor.getByText('Выберите начинку')).not.toBeVisible();
   });
 });
 
 test.describe('Тестирование модального окна', () => {
   test.beforeEach(async ({ page }) => {
-    await page.routeFromHAR(path.join(harsDir, 'ingredients.har'), {
-      url: '**/ingredients',
-      update: false
-    });
+    await setupIngredientsMock(page);
   });
 
   test('Проверка - открытие модального окна ингредиента', async ({ page }) => {
