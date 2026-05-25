@@ -4,12 +4,27 @@ import { test, expect, Page, BrowserContext } from '@playwright/test';
 const harsDir = path.join(__dirname, '../e2e/hars');
 const mockUserName = 'Test User';
 const mockOrderNumber = '12345';
+const mockAccessToken = 'mock-access-token';
+const mockRefreshToken = 'mock-refresh-token';
 const mockBunName = 'Краторная булка N-200i';
+const mockBunId = '643d69a5c3f7b9001cfa093c';
 const mockMainName = 'Биокотлета из марсианской Магнолии';
 
 function getConstructor(page: Page) {
   return page.locator('section').filter({
     has: page.getByRole('button', { name: 'Оформить заказ' })
+  });
+}
+
+function getOrderModal(page: Page) {
+  return page.locator('#modals > div').filter({
+    has: page.getByText('идентификатор заказа', { exact: true })
+  });
+}
+
+function getIngredientModal(page: Page) {
+  return page.locator('#modals > div').filter({
+    has: page.getByRole('heading', { name: 'Ингредиенты' })
   });
 }
 
@@ -60,14 +75,18 @@ async function setupApiMocks(page: Page) {
   });
 }
 
-async function setAuthCookies(context: BrowserContext) {
+async function prepareAuthState(context: BrowserContext) {
   await context.addCookies([
     {
       name: 'accessToken',
-      value: 'mock-access-token',
+      value: mockAccessToken,
       url: 'http://localhost:4000'
     }
   ]);
+
+  await context.addInitScript((refreshToken) => {
+    localStorage.setItem('refreshToken', refreshToken);
+  }, mockRefreshToken);
 }
 
 test.describe('Перехват запроса ингредиентов', () => {
@@ -89,7 +108,7 @@ test.describe('Перехват запроса ингредиентов', () => 
 test.describe('Моки HAR: пользователь и заказ', () => {
   test.beforeEach(async ({ page, context }) => {
     await setupApiMocks(page);
-    await setAuthCookies(context);
+    await prepareAuthState(context);
   });
 
   test('моковые данные ответа на запрос данных пользователя', async ({
@@ -118,6 +137,15 @@ test.describe('Моки HAR: пользователь и заказ', () => {
       page.getByRole('heading', { name: 'Соберите бургер' })
     ).toBeVisible();
 
+    expect(
+      await page.evaluate(() => localStorage.getItem('refreshToken'))
+    ).toBe(mockRefreshToken);
+
+    const cookies = await page.context().cookies('http://localhost:4000');
+    expect(cookies.find((cookie) => cookie.name === 'accessToken')?.value).toBe(
+      mockAccessToken
+    );
+
     await buildFullBurger(page);
     await expectFullBurgerInConstructor(page);
 
@@ -136,20 +164,20 @@ test.describe('Моки HAR: пользователь и заказ', () => {
     expect(orderBody.success).toBe(true);
     expect(orderBody.order.number).toBe(Number(mockOrderNumber));
 
+    const orderModal = getOrderModal(page);
+
     await expect(
-      page.getByRole('heading', { name: mockOrderNumber })
+      orderModal.getByRole('heading', { name: mockOrderNumber })
     ).toBeVisible();
     await expect(
-      page.getByText('идентификатор заказа', { exact: true })
+      orderModal.getByText('идентификатор заказа', { exact: true })
     ).toBeVisible();
 
     await expectEmptyConstructor(page);
 
-    await page.locator('#modals').getByRole('button').click();
+    await orderModal.locator('button').click();
 
-    await expect(
-      page.getByRole('heading', { name: mockOrderNumber })
-    ).not.toBeVisible();
+    await expect(orderModal).not.toBeVisible();
     await expectEmptyConstructor(page);
   });
 });
@@ -190,8 +218,23 @@ test.describe('Тестирование модального окна', () => {
 
   test('Проверка - открытие модального окна ингредиента', async ({ page }) => {
     await page.goto('/');
-    await page.getByText('Краторная булка N-200i').click();
-    await expect(page.getByText('Ингредиенты')).toBeVisible();
+    await page.getByText(mockBunName).click();
+
+    await expect(page).toHaveURL(new RegExp(`/ingredients/${mockBunId}$`));
+
+    const ingredientModal = getIngredientModal(page);
+    await expect(
+      ingredientModal.getByRole('heading', { name: 'Ингредиенты' })
+    ).toBeVisible();
+    await expect(
+      ingredientModal.getByRole('heading', { name: mockBunName })
+    ).toBeVisible();
+
+    const nutrition = ingredientModal.locator('ul');
+    await expect(nutrition.getByText('420', { exact: true })).toBeVisible();
+    await expect(nutrition.getByText('80', { exact: true })).toBeVisible();
+    await expect(nutrition.getByText('24', { exact: true })).toBeVisible();
+    await expect(nutrition.getByText('53', { exact: true })).toBeVisible();
   });
 
   test('Проверка - закрытие модального окна ингредиента по клику на крестик', async ({
