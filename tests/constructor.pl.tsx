@@ -1,7 +1,7 @@
 import path from 'path';
 import { test, expect, Page, BrowserContext } from '@playwright/test';
 
-const harsDir = path.join(__dirname, '../e2e/hars');
+const harsDir = path.join(__dirname, 'hars');
 const mockUserName = 'Test User';
 const mockOrderNumber = '12345';
 const mockAccessToken = 'mock-access-token';
