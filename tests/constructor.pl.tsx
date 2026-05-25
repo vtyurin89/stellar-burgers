@@ -223,6 +223,7 @@ test.describe('Тестирование модального окна', () => {
     await expect(page).toHaveURL(new RegExp(`/ingredients/${mockBunId}$`));
 
     const ingredientModal = getIngredientModal(page);
+    await expect(ingredientModal).toBeVisible();
     await expect(
       ingredientModal.getByRole('heading', { name: 'Ингредиенты' })
     ).toBeVisible();
@@ -241,32 +242,28 @@ test.describe('Тестирование модального окна', () => {
     page
   }) => {
     await page.goto('/');
-    await page.getByText('Краторная булка N-200i').click();
+    await page.getByText(mockBunName).click();
 
-    const modalHeader = page
-      .getByRole('heading', { name: 'Ингредиенты' })
-      .locator('..');
-    await modalHeader.locator('button svg').click();
+    const ingredientModal = getIngredientModal(page);
+    await expect(ingredientModal).toBeVisible();
 
-    await expect(
-      page.getByRole('heading', { name: 'Ингредиенты' })
-    ).not.toBeVisible();
+    await ingredientModal.locator('button svg').click();
+
+    await expect(ingredientModal).not.toBeVisible();
   });
 
   test('Проверка - закрытие модального окна ингредиента по клику на overlay', async ({
     page
   }) => {
     await page.goto('/');
-    await page.getByText('Краторная булка N-200i').click();
-    await expect(
-      page.getByRole('heading', { name: 'Ингредиенты' })
-    ).toBeVisible();
+    await page.getByText(mockBunName).click();
+
+    const ingredientModal = getIngredientModal(page);
+    await expect(ingredientModal).toBeVisible();
 
     const overlay = page.locator('#modals > div').last();
     await overlay.click({ position: { x: 10, y: 10 } });
 
-    await expect(
-      page.getByRole('heading', { name: 'Ингредиенты' })
-    ).not.toBeVisible();
+    await expect(ingredientModal).not.toBeVisible();
   });
 });
